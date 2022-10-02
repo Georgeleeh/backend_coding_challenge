@@ -166,13 +166,21 @@ def test_output_json():
     and reading it back in to check for correctness and sortedness.
     """
 
-    # parse and output a test sales_brand csv file
+    # parse a test sales_brand csv file
     sales_brand_csv_filepath = Path(
 		__file__).parent / Path('test_sales_brand.csv')
 
-    parsed_brand_csv = parse_sales_brand_csv(sales_brand_csv_filepath.as_posix())
+    parsed_brand_csv = parse_sales_brand_csv(
+        sales_brand_csv_filepath.as_posix())
 
-    output = output_json(brand_data=parsed_brand_csv,
+    # parse a test sales_product csv file
+    sales_product_csv_filepath = Path(
+        __file__).parent / Path('test_sales_product.csv')
+
+    parsed_product_csv = parse_sales_product_csv(
+        sales_product_csv_filepath.as_posix())
+
+    output = output_json(brand_data=parsed_brand_csv, product_data=parsed_product_csv,
 	                     output_filename='test_results.json')
 
     # first check the output of the output_json function
@@ -192,11 +200,19 @@ def test_output_json():
     # check it is read in as a dict with content
     assert isinstance(test_json_data, dict)
     assert test_json_data.get("BRAND") is not None
+    assert test_json_data.get("PRODUCT") is not None
+    assert len(test_json_data["PRODUCT"]) == 4
+    assert len(test_json_data["BRAND"]) == 5
 
     # check entries are sorted by brand_name
     test_json_brand_entries = [entry['brand_name']
                                for entry in test_json_data["BRAND"]]
     assert test_json_brand_entries == sorted(test_json_brand_entries)
+
+    # check entries are sorted by product_name
+    test_json_product_entries = [entry['product_name']
+                                 for entry in test_json_data["PRODUCT"]]
+    assert test_json_product_entries == sorted(test_json_product_entries)
 
     # check entries are sorted by current week
     test_json_current_weeks = [entry['current_week_commencing_date']
@@ -210,7 +226,7 @@ def test_output_json():
     test_json_output_path.unlink()
 
 
-def test_skeleton_code_returns_true():
+def test_main_returns_true():
     """
     Example test
 

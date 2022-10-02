@@ -127,7 +127,7 @@ def parse_sales_product_csv(csv_filename: str) -> dict:
     return products
 
 
-def output_json(brand_data: dict, output_filename: str = 'results.json') -> dict:
+def output_json(brand_data: dict, product_data: dict, output_filename: str = 'results.json') -> dict:
     """
     Create an json file containing ordered weekly growth data for all brands and products.
     """
@@ -182,6 +182,49 @@ def output_json(brand_data: dict, output_filename: str = 'results.json') -> dict
         for item in no_current_weekly_data:
             output["BRAND"].append(item)
 
+    sorted_product_names = sorted(product_data.keys())
+
+    for product_name in sorted_product_names:
+
+        barcode_no = product_data[product_name]["barcode_no"]
+        product_name = product_data[product_name]["product_name"]
+
+        sorted_weekly_data_keys = sorted(
+            product_data[product_name]["weekly_data"].keys())
+
+        # used to hold entries with no current weekly data
+        # so they can be appended after
+        no_current_weekly_data = []
+
+        for week_key in sorted_weekly_data_keys:
+            weekly_data = product_data[product_name]["weekly_data"][week_key]
+
+            if weekly_data.current_week_commencement_date(iso=True) is not None:
+
+                output["PRODUCT"].append({
+                    "barcode_no": barcode_no,
+                    "product_name": product_name,
+                    "current_week_commencing_date": weekly_data.current_week_commencement_date(iso=True),
+                    "previous_week_commencing_date": weekly_data.previous_week_commencement_date(iso=True),
+                    "perc_gross_sales_growth": weekly_data.gross_sales_percentage_growth,
+                    "perc_unit_sales_growth": weekly_data.units_sold_percentage_growth
+                })
+
+            else:
+
+                no_current_weekly_data.append({
+                    "barcode_no": barcode_no,
+                    "product_name": product_name,
+                    "current_week_commencing_date": weekly_data.current_week_commencement_date(iso=True),
+                    "previous_week_commencing_date": weekly_data.previous_week_commencement_date(iso=True),
+                    "perc_gross_sales_growth": weekly_data.gross_sales_percentage_growth,
+                    "perc_unit_sales_growth": weekly_data.units_sold_percentage_growth
+                })
+
+        # append entries with no current weekly data
+        for item in no_current_weekly_data:
+            output["PRODUCT"].append(item)
+
     with open(json_file_path.as_posix(), "w", encoding='utf-8') as outfile:
         json.dump(output, outfile)
 
@@ -201,7 +244,7 @@ def run() -> bool:
     sales_product_data = parse_sales_product_csv(
         DATA_FOLDER_PATH / Path("sales_product.csv"))
 
-    output_json(brand_data=sales_brand_data)
+    output_json(brand_data=sales_brand_data, product_data=sales_product_data)
 
     return True
 
