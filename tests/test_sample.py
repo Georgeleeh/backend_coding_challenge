@@ -79,6 +79,9 @@ def test_class_weekly_data():
 
 
 def test_parse_sales_product_csv():
+    """
+    Tests the csv ingest function for sales_product csv files.
+    """
     sales_product_csv_filepath = Path(
         __file__).parent / Path('test_sales_product.csv')
     assert sales_product_csv_filepath.exists()
@@ -117,7 +120,7 @@ def test_parse_sales_product_csv():
 
 def test_parse_sales_brand_csv():
     """
-    Tests the csv ingect function for sales_brand csv files.
+    Tests the csv ingest function for sales_brand csv files.
     """
     sales_brand_csv_filepath = Path(
         __file__).parent / Path('test_sales_brand.csv')
