@@ -50,6 +50,26 @@ def test_class_weekly_data():
             units_sold=60
         )
 
+    gross_sales_percentage_growth = test_weekly_data.gross_sales_percentage_growth
+    assert isinstance(gross_sales_percentage_growth, float)
+    assert gross_sales_percentage_growth == 100.0
+
+    units_sold_percentage_growth = test_weekly_data.units_sold_percentage_growth
+    assert isinstance(units_sold_percentage_growth, float)
+    assert units_sold_percentage_growth == 100.0
+
+    # set the current weekly_data to None to test previous data but no current data
+    test_weekly_current = test_weekly_data.current
+    test_weekly_data.current = None
+    units_sold_percentage_growth = test_weekly_data.units_sold_percentage_growth
+    assert units_sold_percentage_growth == -100.0
+
+    # set the previous weekly_data to None to test current data but no previous data
+    test_weekly_data.current = test_weekly_current
+    test_weekly_data.previous = None
+    units_sold_percentage_growth = test_weekly_data.units_sold_percentage_growth
+    assert units_sold_percentage_growth == None
+
 
 def test_parse_sales_product_csv():
     sales_product_csv_filepath = Path(

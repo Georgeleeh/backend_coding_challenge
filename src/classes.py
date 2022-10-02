@@ -43,3 +43,30 @@ class WeeklyData:
         else:
             raise ValueError(
                 "period_name not recognised. Expected 'current' or 'previous'.")
+
+    def __percentage_change(self, target: str):
+        # functionally an if-elif-else stack but no need for elifs because it returns
+        if self.current is None and self.previous is not None:
+            return -100.0
+        if self.current is not None and self.previous is None:
+            return None
+
+        curr = self.current[target]
+        prev = self.previous[target]
+        perc = (curr - prev) / prev * 100
+
+        return round(perc, 2)
+
+    @property
+    def gross_sales_percentage_growth(self) -> float:
+        """
+        Returns the percentage growth for gross_sales to 2 d.p.
+        """
+        return self.__percentage_change('gross_sales')
+
+    @property
+    def units_sold_percentage_growth(self) -> float:
+        """
+        Returns the percentage growth for units_sold to 2 d.p.
+        """
+        return self.__percentage_change('units_sold')
