@@ -1,0 +1,6 @@
+period_id,period_name,week_commencing_date,barcode_no,product_name,gross_sales,units_sold
+1,previous,04/07/2021,1234,Product A,200,20
+2,current,04/07/2022,1234,Product A,300,30
+2,current,18/07/2022,1234,Product A,200,40
+1,previous,18/07/2021,2345,Product B,410.08,50
+2,current,25/07/2021,3456,Product C,314.31,38
