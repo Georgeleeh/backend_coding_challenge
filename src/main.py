@@ -5,9 +5,11 @@ Outputs a JSON file with weekly percentage growth information.
 
 import csv
 from datetime import datetime
+import json
 import os
 from pathlib import Path
 import sys
+from typing import OrderedDict
 
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
@@ -15,6 +17,7 @@ sys.path.insert(0, os.path.abspath(
 from src.classes import WeeklyData
 
 DATA_FOLDER_PATH = Path(__file__).parent.parent / Path("data")
+OUTPUT_FOLDER_PATH = Path(__file__).parent.parent / Path("output")
 
 
 def parse_sales_brand_csv(csv_filename: str) -> dict:
@@ -124,6 +127,67 @@ def parse_sales_product_csv(csv_filename: str) -> dict:
     return products
 
 
+def output_json(brand_data: dict, output_filename: str = 'results.json') -> dict:
+    """
+    Create an json file containing ordered weekly growth data for all brands and products.
+    """
+    output = OrderedDict({
+        "PRODUCT": [],
+        "BRAND": []
+    })
+
+    json_file_path = OUTPUT_FOLDER_PATH / Path(output_filename)
+
+    sorted_brand_names = sorted(brand_data.keys())
+
+    for brand_name in sorted_brand_names:
+
+        brand_id = brand_data[brand_name]["brand_id"]
+        brand_name = brand_data[brand_name]["brand_name"]
+
+        sorted_weekly_data_keys = sorted(
+            brand_data[brand_name]["weekly_data"].keys())
+
+        # used to hold entries with no current weekly data
+        # so they can be appended after
+        no_current_weekly_data = []
+
+        for week_key in sorted_weekly_data_keys:
+            weekly_data = brand_data[brand_name]["weekly_data"][week_key]
+
+            if weekly_data.current_week_commencement_date(iso=True) is not None:
+                output["BRAND"].append({
+                    "brand_id": brand_id,
+                    "brand_name": brand_name,
+                    "current_week_commencing_date":
+                    weekly_data.current_week_commencement_date(iso=True),
+                    "previous_week_commencing_date":
+                    weekly_data.previous_week_commencement_date(iso=True),
+                    "perc_gross_sales_growth": weekly_data.gross_sales_percentage_growth,
+                    "perc_unit_sales_growth": weekly_data.units_sold_percentage_growth
+                })
+            else:
+                no_current_weekly_data.append({
+                    "brand_id": brand_id,
+                    "brand_name": brand_name,
+                    "current_week_commencing_date":
+                    weekly_data.current_week_commencement_date(iso=True),
+                    "previous_week_commencing_date":
+                    weekly_data.previous_week_commencement_date(iso=True),
+                    "perc_gross_sales_growth": weekly_data.gross_sales_percentage_growth,
+                    "perc_unit_sales_growth": weekly_data.units_sold_percentage_growth
+                })
+
+        # append entries with no current weekly data
+        for item in no_current_weekly_data:
+            output["BRAND"].append(item)
+
+    with open(json_file_path.as_posix(), "w", encoding='utf-8') as outfile:
+        json.dump(output, outfile)
+
+    return output
+
+
 def run() -> bool:
     """
     Please update this function with a function that can run your
@@ -136,6 +200,8 @@ def run() -> bool:
 
     sales_product_data = parse_sales_product_csv(
         DATA_FOLDER_PATH / Path("sales_product.csv"))
+
+    output_json(brand_data=sales_brand_data)
 
     return True
 

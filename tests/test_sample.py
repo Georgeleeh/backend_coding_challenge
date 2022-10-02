@@ -2,11 +2,12 @@
 Tests covering main.py and classes.py
 """
 from datetime import date
+import json
 from pathlib import Path
 import sys
 import os
 import pytest
-from src.main import run, parse_sales_brand_csv, parse_sales_product_csv
+from src.main import run, parse_sales_brand_csv, parse_sales_product_csv, output_json
 from src.classes import WeeklyData
 
 sys.path.insert(0, os.path.abspath(
@@ -156,6 +157,26 @@ def test_parse_sales_brand_csv():
     assert parsed_csv['Brand A']['weekly_data']['18/07'].current['units_sold'] == 40
     assert parsed_csv['Brand B']['weekly_data']['18/07'].previous['units_sold'] == 50
     assert parsed_csv['Brand C']['weekly_data']['25/07'].current['units_sold'] == 38
+
+
+def test_output_json():
+	sales_brand_csv_filepath = Path(
+		__file__).parent / Path('test_sales_brand.csv')
+
+	parsed_brand_csv = parse_sales_brand_csv(sales_brand_csv_filepath.as_posix())
+
+	output = output_json(brand_data=parsed_brand_csv, output_filename='test_results.json')
+
+	assert isinstance(output, dict)
+	test_json_output_path = Path(
+	    __file__).parent.parent / Path('output/test_results.json')
+	assert test_json_output_path.exists()
+
+	test_json_file = open(test_json_output_path.as_posix(),
+	                      mode='r', encoding='utf-8')
+	test_json_data = json.load(test_json_file)
+
+	assert isinstance(test_json_data, dict)
 
 
 def test_skeleton_code_returns_true():
