@@ -18,12 +18,17 @@ def test_class_weekly_data():
     """
     Tests for the class WeeklyData.
     """
+
+    # create a new WeeklyData instance for testing
     test_weekly_data = WeeklyData()
+    
+    # check starting values are null
     assert test_weekly_data.current is None
     assert test_weekly_data.previous is None
     assert test_weekly_data.current_week_commencement_date() is None
     assert test_weekly_data.previous_week_commencement_date() is None
 
+    # add current dummy data
     test_weekly_data.add_data(
         period_id=2,
         period_name="current",
@@ -32,11 +37,14 @@ def test_class_weekly_data():
         units_sold=20
     )
 
+    # verify the data was correctly stored as current weekly data
     assert isinstance(test_weekly_data.current, dict)
+    # check the week_commencement_date output data types
     assert isinstance(test_weekly_data.current_week_commencement_date(), date)
     assert isinstance(
         test_weekly_data.current_week_commencement_date(iso=True), str)
 
+    # add previous dummy data
     test_weekly_data.add_data(
         period_id=1,
         period_name="previous",
@@ -45,11 +53,14 @@ def test_class_weekly_data():
         units_sold=10
     )
 
+    # verify the data was correctly stored as previous weekly data
     assert isinstance(test_weekly_data.previous, dict)
+    # check the week_commencement_date output data types
     assert isinstance(test_weekly_data.previous_week_commencement_date(), date)
     assert isinstance(
 		test_weekly_data.previous_week_commencement_date(iso=True), str)
 
+    # attempt to add data from an unrecognised period
     with pytest.raises(ValueError):
         test_weekly_data.add_data(
             period_id=3,
@@ -59,13 +70,17 @@ def test_class_weekly_data():
             units_sold=60
         )
 
+    # verify gross_sales_percentage_growth is calcuating correctly 
     gross_sales_percentage_growth = test_weekly_data.gross_sales_percentage_growth
     assert isinstance(gross_sales_percentage_growth, float)
     assert gross_sales_percentage_growth == 100.0
 
+    # verify units_sold_percentage_growth is calcuating correctly
     units_sold_percentage_growth = test_weekly_data.units_sold_percentage_growth
     assert isinstance(units_sold_percentage_growth, float)
     assert units_sold_percentage_growth == 100.0
+
+    # test percentage calculation edge cases
 
     # set the current weekly_data to None to test previous data but no current data
     test_weekly_current = test_weekly_data.current
@@ -77,7 +92,7 @@ def test_class_weekly_data():
     test_weekly_data.current = test_weekly_current
     test_weekly_data.previous = None
     units_sold_percentage_growth = test_weekly_data.units_sold_percentage_growth
-    assert units_sold_percentage_growth == None
+    assert units_sold_percentage_growth is None
 
 
 def test_parse_sales_product_csv():
