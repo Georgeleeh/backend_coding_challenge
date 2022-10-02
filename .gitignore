@@ -69,3 +69,6 @@ deployment-package.zip
 #Python Caches
 __pycache__
 .pytest_cache
+
+#Program Outputs
+output/results.json
