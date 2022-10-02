@@ -2,10 +2,11 @@
 Tests covering main.py and classes.py
 """
 from datetime import date
+from pathlib import Path
 import sys
 import os
 import pytest
-from src.main import run
+from src.main import run, parse_sales_brand_csv
 from src.classes import WeeklyData
 
 sys.path.insert(0, os.path.abspath(
@@ -48,6 +49,46 @@ def test_class_weekly_data():
             gross_sales=600,
             units_sold=60
         )
+
+
+def test_parse_sales_brand_csv():
+    """
+    Tests the csv ingect function for sales_brand csv files.
+    """
+    sales_brand_csv_filepath = Path(
+        __file__).parent / Path('test_sales_brand.csv')
+    assert sales_brand_csv_filepath.exists()
+    parsed_csv = parse_sales_brand_csv(sales_brand_csv_filepath.as_posix())
+
+    # check that 3 brands are present
+    assert isinstance(parsed_csv, dict)
+    assert len(parsed_csv) == 3
+
+    # check variable types are correct
+    assert isinstance(parsed_csv['Brand A'], dict)
+    assert isinstance(parsed_csv['Brand A']['brand_id'], int)
+    assert isinstance(parsed_csv['Brand A']['brand_name'], str)
+    assert isinstance(parsed_csv['Brand A']['weekly_data'], dict)
+
+    # check correct number of weekly data entries
+    assert len(parsed_csv['Brand A']['weekly_data']) == 3
+    assert len(parsed_csv['Brand B']['weekly_data']) == 1
+    assert len(parsed_csv['Brand C']['weekly_data']) == 1
+
+    # check variable types are correct
+    assert isinstance(parsed_csv['Brand A']
+                      ['weekly_data']['04/07'].current, dict)
+    assert isinstance(parsed_csv['Brand A']['weekly_data']
+                      ['04/07'].current['gross_sales'], float)
+    assert isinstance(parsed_csv['Brand A']['weekly_data']
+                      ['04/07'].current['units_sold'], int)
+
+    # check values are correct
+    assert parsed_csv['Brand A']['weekly_data']['04/07'].previous['units_sold'] == 20
+    assert parsed_csv['Brand A']['weekly_data']['04/07'].current['units_sold'] == 30
+    assert parsed_csv['Brand A']['weekly_data']['18/07'].current['units_sold'] == 40
+    assert parsed_csv['Brand B']['weekly_data']['18/07'].previous['units_sold'] == 50
+    assert parsed_csv['Brand C']['weekly_data']['25/07'].current['units_sold'] == 38
 
 
 def test_skeleton_code_returns_true():
