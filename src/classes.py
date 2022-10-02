@@ -70,3 +70,29 @@ class WeeklyData:
         Returns the percentage growth for units_sold to 2 d.p.
         """
         return self.__percentage_change('units_sold')
+
+    def current_week_commencement_date(self, iso=False):
+        """
+        Returns the week_commencement_date for the current period.
+        Can be a date object or iso format (str).
+        """
+        if self.current is None:
+            return None
+
+        if iso:
+            return self.current["week_commencement_date"].isoformat()
+
+        return self.current["week_commencement_date"]
+
+    def previous_week_commencement_date(self, iso=False):
+        """
+        Returns the week_commencement_date for the previous period.
+        Can be a date object or iso format (str).
+        """
+        if self.previous is None:
+            return None
+
+        if iso:
+            return self.previous["week_commencement_date"].isoformat()
+
+        return self.previous["week_commencement_date"]

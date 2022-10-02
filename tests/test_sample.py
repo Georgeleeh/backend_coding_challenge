@@ -20,6 +20,8 @@ def test_class_weekly_data():
     test_weekly_data = WeeklyData()
     assert test_weekly_data.current is None
     assert test_weekly_data.previous is None
+    assert test_weekly_data.current_week_commencement_date() is None
+    assert test_weekly_data.previous_week_commencement_date() is None
 
     test_weekly_data.add_data(
         period_id=2,
@@ -30,6 +32,8 @@ def test_class_weekly_data():
     )
 
     assert isinstance(test_weekly_data.current, dict)
+    assert isinstance(test_weekly_data.current_week_commencement_date(), date)
+    assert isinstance(test_weekly_data.current_week_commencement_date(iso=True), str)
 
     test_weekly_data.add_data(
         period_id=1,
@@ -40,6 +44,9 @@ def test_class_weekly_data():
     )
 
     assert isinstance(test_weekly_data.previous, dict)
+    assert isinstance(test_weekly_data.previous_week_commencement_date(), date)
+    assert isinstance(
+		test_weekly_data.previous_week_commencement_date(iso=True), str)
 
     with pytest.raises(ValueError):
         test_weekly_data.add_data(
