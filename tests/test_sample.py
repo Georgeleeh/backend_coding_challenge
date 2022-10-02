@@ -34,7 +34,8 @@ def test_class_weekly_data():
 
     assert isinstance(test_weekly_data.current, dict)
     assert isinstance(test_weekly_data.current_week_commencement_date(), date)
-    assert isinstance(test_weekly_data.current_week_commencement_date(iso=True), str)
+    assert isinstance(
+        test_weekly_data.current_week_commencement_date(iso=True), str)
 
     test_weekly_data.add_data(
         period_id=1,
@@ -160,23 +161,53 @@ def test_parse_sales_brand_csv():
 
 
 def test_output_json():
-	sales_brand_csv_filepath = Path(
+    """
+    Tests the JSON output using test csv files, outputting a json,
+    and reading it back in to check for correctness and sortedness.
+    """
+
+    # parse and output a test sales_brand csv file
+    sales_brand_csv_filepath = Path(
 		__file__).parent / Path('test_sales_brand.csv')
 
-	parsed_brand_csv = parse_sales_brand_csv(sales_brand_csv_filepath.as_posix())
+    parsed_brand_csv = parse_sales_brand_csv(sales_brand_csv_filepath.as_posix())
 
-	output = output_json(brand_data=parsed_brand_csv, output_filename='test_results.json')
+    output = output_json(brand_data=parsed_brand_csv,
+	                     output_filename='test_results.json')
 
-	assert isinstance(output, dict)
-	test_json_output_path = Path(
+    # first check the output of the output_json function
+    # this should mirror the structure and content of the json file
+    assert isinstance(output, dict)
+
+    # check the json file was created in the specified location
+    test_json_output_path = Path(
 	    __file__).parent.parent / Path('output/test_results.json')
-	assert test_json_output_path.exists()
+    assert test_json_output_path.exists()
 
-	test_json_file = open(test_json_output_path.as_posix(),
+    # read the created json file back in to check
+    test_json_file = open(test_json_output_path.as_posix(),
 	                      mode='r', encoding='utf-8')
-	test_json_data = json.load(test_json_file)
+    test_json_data = json.load(test_json_file)
 
-	assert isinstance(test_json_data, dict)
+    # check it is read in as a dict with content
+    assert isinstance(test_json_data, dict)
+    assert test_json_data.get("BRAND") is not None
+
+    # check entries are sorted by brand_name
+    test_json_brand_entries = [entry['brand_name']
+                               for entry in test_json_data["BRAND"]]
+    assert test_json_brand_entries == sorted(test_json_brand_entries)
+
+    # check entries are sorted by current week
+    test_json_current_weeks = [entry['current_week_commencing_date']
+                               for entry in test_json_data["BRAND"] if entry['brand_name'] == 'Brand A']
+
+    # entries with no current week come last
+    assert test_json_current_weeks[-1] is None
+    assert test_json_current_weeks[:-1] == sorted(test_json_current_weeks[:-1])
+
+    # remove the test results file when we're done
+    test_json_output_path.unlink()
 
 
 def test_skeleton_code_returns_true():
